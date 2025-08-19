@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify
+import os
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../frontend/build', static_url_path='')
 CORS(app)
 
 @app.route("/api/chat", methods=["POST"])
@@ -32,6 +33,16 @@ def chat():
     except Exception as e:
         print("Error in /api/chat:", str(e))
         return jsonify({"error": "Server error", "details": str(e)}), 500
+
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    static_folder_path = app.static_folder or '../frontend/build'
+    if path != "" and os.path.exists(os.path.join(static_folder_path, path)):
+        return send_from_directory(static_folder_path, path)
+    else:
+        return send_from_directory(static_folder_path, 'index.html')
 
 
 import os
