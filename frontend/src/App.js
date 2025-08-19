@@ -1,10 +1,11 @@
 import React from "react";
-import Chatbox from "./components/Chatbox";
+import UnifiedEmotionalAgent from "./components/UnifiedEmotionalAgent";
+import "./components/UnifiedEmotionalAgent.css";
 
 function App() {
   return (
-    <div>
-      <Chatbox />
+    <div className="app-container">
+      <UnifiedEmotionalAgent />
     </div>
   );
 }

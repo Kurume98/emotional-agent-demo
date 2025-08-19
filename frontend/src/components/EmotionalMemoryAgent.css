@@ -151,216 +151,96 @@
 }
 
 /* Input Section */
-.input<thinking>
-The task involves enhancing the emotional agent demo to ensure that all emotional shifts, including mood changes and their visual representations, are displayed on a single page where the chat is happening. 
-
-### Current State:
-1. **EmotionalMemoryAgent.js**: This component has been created to handle emotional memory and display emotional shifts.
-2. **VoiceEmotionalAgent.js**: This component is designed for voice analysis but needs to be integrated with the emotional memory features.
-3. **User Feedback**: The user wants to ensure that all emotional shifts are visible, including background color changes, mood orb color changes, and the emotional arc as a memory of every emotional shift.
-
-### Next Steps:
-1. **Integrate Emotional Memory**: Ensure that the emotional memory features are displayed alongside the chat interface.
-2. **Update UI**: Make sure the UI reflects the emotional shifts in real-time, including background color changes and mood indicators.
-3. **Combine Components**: Ensure that the chat, emotional arc, and emotional memory are all visible on the same page.
-
-I will now proceed to update the **EmotionalMemoryAgent.js** to ensure that it integrates well with the chat interface and displays all necessary emotional information on the same page.
-</thinking>
-
-<edit_file>
-<path>frontend/src/components/EmotionalMemoryAgent.js</path>
-<content>
-import React, { useState, useEffect, useRef } from "react";
-import "./EmotionalMemoryAgent.css";
-
-function EmotionalMemoryAgent() {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [isListening, setIsListening] = useState(false);
-  const [currentMood, setCurrentMood] = useState("neutral");
-  const [backgroundColor, setBackgroundColor] = useState("#f5f5f5");
-  const [voiceEmotion, setVoiceEmotion] = useState(null);
-  const [emotionalArc, setEmotionalArc] = useState([]);
-  
-  const recognitionRef = useRef(null);
-
-  useEffect(() => {
-    // Initialize with welcome message
-    setMessages([{
-      text: "Welcome to Emotional Memory Agent. I'll track every emotional shift and create a beautiful memory of your emotional journey.",
-      sender: "bot",
-      timestamp: new Date(),
-      mood: "neutral",
-      voiceEmotion: "neutral"
-    }]);
-    
-    // Initialize emotional arc with starting point
-    setEmotionalArc([{
-      timestamp: new Date(),
-      mood: "neutral",
-      trigger: "conversation_start"
-    }]);
-  }, []);
-
-  const updateEmotionalState = (newMood, voiceEmotion = null) => {
-    const previousMood = currentMood;
-    
-    // Create emotional shift record
-    const emotionalShift = {
-      timestamp: new Date(),
-      previousMood,
-      newMood,
-      voiceEmotion,
-      id: Date.now()
-    };
-    
-    // Update emotional arc
-    setEmotionalArc(prev => [...prev, {
-      timestamp: new Date(),
-      mood: newMood,
-      trigger: "user_message"
-    }]);
-    
-    // Update current state
-    setCurrentMood(newMood);
-    updateBackgroundColor(newMood);
-  };
-
-  const updateBackgroundColor = (mood) => {
-    const baseColors = {
-      neutral: "#f5f5f5",
-      happy: "#fff3e0",
-      excited: "#ffe0b2",
-      sad: "#e3f2fd",
-      angry: "#ffebee",
-      calm: "#e8f5e8"
-    };
-    
-    const color = baseColors[mood] || baseColors.neutral;
-    setBackgroundColor(color);
-  };
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    const textEmotion = analyzeTextEmotion(input);
-    const finalEmotion = voiceEmotion || textEmotion;
-    
-    const userMessage = { 
-      text: input, 
-      sender: "user", 
-      timestamp: new Date(),
-      mood: finalEmotion,
-      voiceEmotion: voiceEmotion || "none"
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    updateEmotionalState(finalEmotion, voiceEmotion);
-
-    try {
-      const response = await fetch("http://127.0.0.1:5000/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          message: input,
-          voiceEmotion: voiceEmotion
-        }),
-      });
-
-      const data = await response.json();
-      
-      const botMessage = { 
-        text: data.reply, 
-        sender: "bot",
-        timestamp: new Date(),
-        mood: data.reply.includes("sad") ? "sad" : "neutral"
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
-      updateEmotionalState(botMessage.mood);
-      
-    } catch (error) {
-      console.error("Error:", error);
-      const errorMessage = { 
-        text: "I'm having trouble connecting. Please try again.", 
-        sender: "bot",
-        timestamp: new Date(),
-        mood: "neutral"
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    }
-
-    setInput("");
-    setVoiceEmotion(null);
-  };
-
-  const analyzeTextEmotion = (text) => {
-    const lowerText = text.toLowerCase();
-    
-    if (lowerText.includes("excited") || lowerText.includes("amazing")) {
-      return "excited";
-    } else if (lowerText.includes("happy")) {
-      return "happy";
-    } else if (lowerText.includes("sad")) {
-      return "sad";
-    } else if (lowerText.includes("angry")) {
-      return "angry";
-    }
-    return "neutral";
-  };
-
-  return (
-    <div className="emotional-memory-container" style={{ backgroundColor }}>
-      <header className="emotional-header">
-        <h1>🧠 Emotional Memory Agent</h1>
-      </header>
-
-      <main className="emotional-main">
-        <div className="chat-section">
-          <div className="messages-container">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`message ${msg.sender}`}>
-                <div className="message-content">{msg.text}</div>
-                <div className="message-meta">
-                  <span className="message-mood">{msg.mood}</span>
-                  {msg.voiceEmotion && msg.voiceEmotion !== "none" && (
-                    <span className="voice-indicator">🎤 {msg.voiceEmotion}</span>
-                  )}
-                  <span className="message-timestamp">
-                    {msg.timestamp.toLocaleTimeString()}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="input-section">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Share your feelings..."
-              className="emotional-input"
-            />
-            <button onClick={handleSend} className="send-button">💬 Send</button>
-          </div>
-        </div>
-
-        <div className="memory-section">
-          <h3>🌈 Emotional Journey</h3>
-          <div className="arc-visualization">
-            {emotionalArc.map((point, idx) => (
-              <div key={idx} className="arc-point">
-                <div className="arc-mood">{point.mood}</div>
-                <div className="arc-time">{point.timestamp.toLocaleTimeString()}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </main>
-    </div>
-  );
+.input-section {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #eee;
 }
 
-export default EmotionalMemoryAgent;
+.emotional-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.emotional-input:focus {
+  border-color: #667eea;
+}
+
+.send-button {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.send-button:hover {
+  transform: translateY(-2px);
+}
+
+/* Memory Section */
+.memory-section {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  height: fit-content;
+}
+
+.memory-section h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.arc-visualization {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.arc-point {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+}
+
+.arc-mood {
+  font-weight: bold;
+  color: #667eea;
+}
+
+.arc-time {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .emotional-main {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  
+  .emotional-header {
+    padding: 1rem;
+  }
+  
+  .emotional-header h1 {
+    font-size: 1.5rem;
+  }
+}
