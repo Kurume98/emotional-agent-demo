@@ -7,7 +7,7 @@ function EmotionalArc() {
   useEffect(() => {
     const fetchArc = async () => {
       try {
-        const res = await axios.post("http://127.0.0.1:5000/chat", { message: "" });
+        const res = await axios.post("/api/chat", { message: "" });
         setArc(res.data.arc || []);
       } catch (error) {
         console.error("Error fetching arc:", error);

@@ -20,7 +20,7 @@ function EmotionalMemoryAgent() {
   useEffect(() => {
     // Initialize with welcome message
     setMessages([{
-      text: "Welcome to Emotional Memory Agent. I'll track every emotional shift and create a beautiful memory of your emotional journey.",
+      text: "Welcome to AIcognitech Emotional Memory. I'll track every emotional shift and create a beautiful memory of your emotional journey.",
       sender: "bot",
       timestamp: new Date(),
       mood: "neutral",
@@ -252,7 +252,7 @@ function EmotionalMemoryAgent() {
     updateEmotionalState(finalEmotion, voiceEmotion, "user_message");
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/emotional-chat", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -355,7 +355,10 @@ function EmotionalMemoryAgent() {
   return (
     <div className="emotional-memory-container" style={{ backgroundColor }}>
       <header className="emotional-header">
-        <h1>🧠 Emotional Memory Agent</h1>
+        <div className="emotional-header-content">
+          <img src="/aicognitech-logo.jpg" alt="AIcognitech" className="logo" />
+          <h1>🧠 AIcognitech Emotional Memory</h1>
+        </div>
         <div className="current-state">
           <div 
             className="mood-orb" 

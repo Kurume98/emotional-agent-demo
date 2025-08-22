@@ -49,7 +49,7 @@ function EnhancedChatbox() {
     setMessages([...messages, userMessage]);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/chat", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: input }),
@@ -110,7 +110,10 @@ function EnhancedChatbox() {
         </div>
         
         <div className="chatbox">
-          <div className="chatbox-header">Adaptive Emotional Intelligence</div>
+          <div className="chatbox-header">
+            <img src="/aicognitech-logo.jpg" alt="AIcognitech" className="logo-small" />
+            AIcognitech
+          </div>
           
           <div className="messages">
             {messages.map((msg, idx) => (

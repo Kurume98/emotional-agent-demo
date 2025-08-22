@@ -19,7 +19,7 @@ function VoiceEmotionalAgent() {
   useEffect(() => {
     // Initialize with welcome message
     setMessages([{
-      text: "Welcome to Voice Emotional Intelligence. I'll analyze both your words and voice tone to understand your emotions.",
+      text: "Welcome to AIcognitech Voice Analysis. I'll analyze both your words and voice tone to understand your emotions.",
       sender: "bot",
       timestamp: new Date()
     }]);
@@ -307,7 +307,10 @@ function VoiceEmotionalAgent() {
   return (
     <div className="voice-agent-container" style={{ backgroundColor }}>
       <header className="voice-header">
-        <h1>🎤 Voice Emotional Intelligence</h1>
+        <div className="voice-header-content">
+          <img src="/aicognitech-logo.jpg" alt="AIcognitech" className="logo" />
+          <h1>🎤 AIcognitech Voice Analysis</h1>
+        </div>
         <div className="mood-indicator">
           <div className="mood-orb" style={{ backgroundColor: getMoodColor() }}>
             <div className="mood-emoji">{getMoodEmoji()}</div>
